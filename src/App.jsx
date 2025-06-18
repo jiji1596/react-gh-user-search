@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState(null);
+  const [users, setUsers] = useState([]);
+
+  function inputChange(event) {
+    setInput(event.currentTarget.value);
+  }
+
+  function handleClick() {
+    const url = `https://api.github.com/users/${input}`;
+
+    fetch(url)
+      .then((resp) => resp.json())
+      .then((data) => {
+        console.log(data);
+
+        setResult(data)
+      });
+  }
+
+
+  function ResultCard() {
+    return (
+      <div className="card card-side bg-base-100 shadow-sm w-144">
+          <figure>
+            <img
+              src={result.avatar_url}
+              alt="Movie"
+              className="w-60"
+            />
+          </figure>
+          <div className="card-body">
+            <h2 className="card-title">{result.login}</h2>
+            <p>{result.bio}</p>
+            <div className="card-actions justify-end">
+              <button className="btn btn-primary">Watch</button>
+            </div>
+          </div>
+      </div>
+    )
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div>
+      <div className="flex justify-center mb-5">
+        <input
+          type="text"
+          placeholder="Secondary"
+          className="input input-secondary input-lg w-[480px] mr-5"
+          onChange={inputChange}
+        />
+        <button className="btn btn-secondary btn-lg" onClick={handleClick}>
+          Search
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      <div className="result place-items-center">
+        { result && <ResultCard /> }
+
+      </div>
+      <div className="cards"></div>
+    </div>
+  );
 }
 
-export default App
+export default App;
