@@ -3,9 +3,6 @@ import "./App.css";
 import ResultCard from "./components/ResultCard";
 import SavedUserCard from "./components/SavedUserCard";
 
-
-
-
 function App() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState(null);
@@ -19,6 +16,7 @@ function App() {
   }
 
   function handleClick() {
+    setError(null);
     setUser(null);
     setLoading(true);
     setResult(input);
@@ -31,24 +29,35 @@ function App() {
       fetch(url)
         .then((resp) => resp.json())
         .then((data) => {
-         if (data.cod !== 200) {
-          setError(true);      // 👈 city not found
-          setLoading(false);
-          return;
-        }
-
+          if (data.message === "Not Found") {
+            setError(true); // 👈 city not found
+            setLoading(false);
+            return;
+          }
+          console.log(data);
           setUser(data);
           setLoading(false);
         })
         .catch((err) => {
           console.log(err);
           setLoading(false);
-        })
+        });
     }
   }, [result]);
 
   function handleSaved() {
     setSavedUsers((prev) => [...prev, user]);
+  }
+
+  function handleDelete(key) {
+    setSavedUsers(prev =>
+      prev.filter((user, i) => {
+        if (key === i) {
+          return false
+        }
+        return user
+      })
+    );
   }
 
   return (
@@ -73,16 +82,21 @@ function App() {
         {loading && (
           <span className="loading loading-ring loading-xl text-primary"></span>
         )}
-        { error && (
-          <p>Can't find the user</p>
-        )}
+        {error && <p>Can't find the user</p>}
         {user && <ResultCard user={user} saveUser={handleSaved} />}
       </div>
       <div className="cards">
-        <h2 className="text-4xl text-center">Saved Genius Profiles</h2>
-        <div className="grid grid-cols-4 gap-3">
+        <h2 className="text-4xl text-center mb-5">Saved Genius Profiles</h2>
+        <div className="grid grid-cols-4 gap-3 w-8/10 mx-auto">
           {savedUsers.map((userData, i) => {
-            return <SavedUserCard user={userData} key={i} />;
+            return (
+              <SavedUserCard
+                user={userData}
+                key={i}
+                index={i}
+                deleteUser={handleDelete}
+              />
+            );
           })}
         </div>
       </div>
