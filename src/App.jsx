@@ -43,12 +43,16 @@ function App() {
   const [result, setResult] = useState(null);
   const [user, setUser] = useState();
   const [savedUsers, setSavedUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   function inputChange(event) {
     setInput(event.currentTarget.value);
   }
 
   function handleClick() {
+    setUser(null);
+    setLoading(true);
     setResult(input);
   }
 
@@ -59,10 +63,19 @@ function App() {
       fetch(url)
         .then((resp) => resp.json())
         .then((data) => {
-          console.log(data);
+         if (data.cod !== 200) {
+          setError(true);      // 👈 city not found
+          setLoading(false);
+          return;
+        }
 
           setUser(data);
-        });
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoading(false);
+        })
     }
   }, [result]);
 
@@ -88,7 +101,13 @@ function App() {
           Search
         </button>
       </div>
-      <div className="result place-items-center mb-5">
+      <div className="result flex justify-center mb-5 ">
+        {loading && (
+          <span className="loading loading-ring loading-xl text-primary"></span>
+        )}
+        { error && (
+          <p>Can't find the user</p>
+        )}
         {user && <ResultCard user={user} saveUser={handleSaved} />}
       </div>
       <div className="cards">
